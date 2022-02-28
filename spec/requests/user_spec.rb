@@ -21,6 +21,37 @@ RSpec.describe UsersController, type: :request do
     end
   end
 
+  describe 'GET /users/:_username' do
+    before do
+      headers = {
+        'Authorization' => JsonWebToken.encode({ user_id: 1 })
+      }
+      get "/users/#{username}", params: {}, headers: headers
+    end
+
+    context 'when the user exists' do
+      it 'returns an user' do
+        expect(json['id']).to eq(users.first.id)
+      end
+
+      it 'returns status code 200' do
+        expect(response).to have_http_status(200)
+      end
+    end
+
+    context 'when the user does not exist' do
+      let(:username) { 'notfound' }
+
+      it 'returns status code 404' do
+        expect(response).to have_http_status(404)
+      end
+
+      it 'returns a failure message' do
+        expect(response.body).to include('User not found')
+      end
+    end
+  end
+
   describe 'POST /users' do
     let(:valid_attributes) do
       {
@@ -52,7 +83,7 @@ RSpec.describe UsersController, type: :request do
     end
   end
 
-  describe 'PUT /users/:id' do
+  describe 'PUT /users/:_username' do
     let(:valid_attributes) { { name: 'New name' } }
 
     before do
@@ -81,7 +112,7 @@ RSpec.describe UsersController, type: :request do
     end
   end
 
-  describe 'DELETE /users/:id' do
+  describe 'DELETE /users/:_username' do
     before do
       headers = {
         'Authorization' => JsonWebToken.encode({ user_id: 1 })
