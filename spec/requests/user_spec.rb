@@ -2,6 +2,7 @@ require 'rails_helper'
 
 RSpec.describe UsersController, type: :request do
   let!(:users) { create_list(:user, 10) }
+  let(:username) { users.first.username }
 
   describe 'GET /users' do
     before do
@@ -52,14 +53,40 @@ RSpec.describe UsersController, type: :request do
   end
 
   describe 'PUT /users/:id' do
-    let(:valid_attributes) { { name: Faker::Name.name } }
-    let(:username) { users.first.username }
+    let(:valid_attributes) { { name: 'New name' } }
 
     before do
       headers = {
         'Authorization' => JsonWebToken.encode({ user_id: 1 })
       }
       put "/users/#{username}", params: valid_attributes, headers: headers
+    end
+
+    context 'when user exists' do
+      it 'returns status code 204' do
+        expect(response).to have_http_status(204)
+      end
+    end
+
+    context 'when the user does not exists' do
+      let(:username) { 'notfound' }
+
+      it 'returns status code 404' do
+        expect(response).to have_http_status(404)
+      end
+
+      it 'returns a failure message' do
+        expect(response.body).to include('User not found')
+      end
+    end
+  end
+
+  describe 'DELETE /users/:id' do
+    before do
+      headers = {
+        'Authorization' => JsonWebToken.encode({ user_id: 1 })
+      }
+      delete "/users/#{username}", params: {}, headers: headers
     end
 
     context 'when user exists' do
