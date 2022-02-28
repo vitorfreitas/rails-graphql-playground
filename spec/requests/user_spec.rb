@@ -1,9 +1,9 @@
 require 'rails_helper'
 
 RSpec.describe UsersController, type: :request do
-  describe 'GET /users' do
-    let!(:users) { create_list(:user, 10) }
+  let!(:users) { create_list(:user, 10) }
 
+  describe 'GET /users' do
     before do
       headers = {
         'Authorization' => JsonWebToken.encode({ user_id: 1 })
@@ -24,8 +24,8 @@ RSpec.describe UsersController, type: :request do
     let(:valid_attributes) do
       {
         name: Faker::Name.name,
-        username: Faker::Internet.username,
-        email: Faker::Internet.email,
+        username: 'testusername',
+        email: 'testemail@mail.com',
         password: Faker::Internet.password
       }
     end
@@ -47,6 +47,36 @@ RSpec.describe UsersController, type: :request do
 
       it 'returns a failure message' do
         expect(response.body).to include("can't be blank")
+      end
+    end
+  end
+
+  describe 'PUT /users/:id' do
+    let(:valid_attributes) { { name: Faker::Name.name } }
+    let(:username) { users.first.username }
+
+    before do
+      headers = {
+        'Authorization' => JsonWebToken.encode({ user_id: 1 })
+      }
+      put "/users/#{username}", params: valid_attributes, headers: headers
+    end
+
+    context 'when user exists' do
+      it 'returns status code 204' do
+        expect(response).to have_http_status(204)
+      end
+    end
+
+    context 'when the user does not exists' do
+      let(:username) { 'notfound' }
+
+      it 'returns status code 404' do
+        expect(response).to have_http_status(404)
+      end
+
+      it 'returns a failure message' do
+        expect(response.body).to include('User not found')
       end
     end
   end
