@@ -1,6 +1,7 @@
 require_relative "boot"
 
 require "rails/all"
+require "sprockets/railtie"
 
 # Require the gems listed in Gemfile, including any gems
 # you've limited to :test, :development, or :production.
@@ -23,5 +24,11 @@ module RailsGraphqlPlayground
     # Middleware like session, flash, cookies can be added back manually.
     # Skip views, helpers and assets when generating a new resource.
     config.api_only = true
+
+    if Rails.env.development?
+      config.middleware.use ActionDispatch::Cookies
+      config.middleware.use ActionDispatch::Session::CookieStore
+      config.middleware.insert_after(ActionDispatch::Cookies, ActionDispatch::Session::CookieStore)
+    end
   end
 end

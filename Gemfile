@@ -45,6 +45,8 @@ end
 group :development do
   # Speed up commands on slow machines / big apps [https://github.com/rails/spring]
   # gem "spring"
+  gem 'graphiql-rails'
+  gem 'sass-rails'
 end
 
 group :test do
@@ -56,4 +58,5 @@ end
 
 
 # Use Json Web Token (JWT) for token based authentication
+gem 'graphql'
 gem 'jwt'
